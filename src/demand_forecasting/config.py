@@ -17,9 +17,14 @@ OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 
 # --- Dataset --------------------------------------------------------------
 # UCI Bike Sharing dataset (hourly). Public, no licensing restrictions.
-DATASET_URL = (
-    "https://archive.ics.uci.edu/static/public/275/bike+sharing+dataset.zip"
+# Several sources are tried in order; the UCI host sometimes serves an expired
+# TLS certificate, so a mirror is listed as a fallback.
+DATASET_URLS = (
+    "https://archive.ics.uci.edu/static/public/275/bike+sharing+dataset.zip",
+    "https://web.archive.org/web/2id_/https://archive.ics.uci.edu/static/public/275/bike+sharing+dataset.zip",
 )
+# Backwards-compatible alias for the primary URL.
+DATASET_URL = DATASET_URLS[0]
 RAW_CSV_NAME = "hour.csv"          # file inside the downloaded archive
 TARGET = "cnt"                     # total rentals per hour
 
