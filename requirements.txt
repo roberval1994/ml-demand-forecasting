@@ -9,3 +9,8 @@ certifi>=2023.7.22
 truststore>=0.9; python_version >= "3.10"
 pytest>=7.4
 jupyter>=1.0
+
+# --- Optional extras ---
+# XGBoost unlocks the advanced-model section of the notebook. It is optional:
+# the pipeline runs without it. Install with:  pip install xgboost
+# xgboost>=2.0

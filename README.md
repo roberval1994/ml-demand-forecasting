@@ -64,7 +64,7 @@ ml-demand-forecasting/
 | **1. Data** | `data.py` | Downloads the UCI dataset and loads it into a tidy DataFrame |
 | **2. EDA** | `notebooks/` | Distributions, seasonality, correlations |
 | **3. Features** | `features.py` | Calendar features, **cyclical encoding** (sin/cos), lag & rolling features |
-| **4. Model** | `model.py` | Baseline + Random Forest + Gradient Boosting in a scikit-learn `Pipeline` |
+| **4. Model** | `model.py` | Baseline + Random Forest + Gradient Boosting in a scikit-learn `Pipeline` (+ **optional XGBoost**) |
 | **5. Tuning** | `model.py` | Cross-validated hyperparameter search with time-aware splits |
 | **6. Evaluation** | `evaluate.py` | MAE, RMSE, R²; residual & prediction plots |
 | **7. Explainability** | `explain.py` | Permutation importance and (optional) SHAP values |
@@ -110,6 +110,9 @@ regressions — a habit worth keeping in any serious ML codebase.
 ## 🧰 Tech stack
 
 `Python` · `pandas` · `NumPy` · `scikit-learn` · `Matplotlib` · `seaborn` · `SHAP` · `pytest`
+
+**Optional extra:** `XGBoost` unlocks Section 8 of the walkthrough notebook (advanced
+boosting model). The pipeline runs fine without it; install with `pip install xgboost`.
 
 ## 📚 Design principles
 

@@ -16,6 +16,21 @@ from sklearn.pipeline import Pipeline
 
 from .config import DEFAULT_CONFIG, TARGET, TrainConfig
 
+# XGBoost is an OPTIONAL dependency. The whole pipeline runs without it; when it
+# is installed, XGBoost automatically joins the model comparison. This keeps the
+# project lightweight for casual users while rewarding those who install extras.
+try:
+    from xgboost import XGBRegressor
+
+    HAS_XGBOOST = True
+except ImportError:  # pragma: no cover - depends on the environment
+    HAS_XGBOOST = False
+
+
+def xgboost_available() -> bool:
+    """Return True if the optional ``xgboost`` package is importable."""
+    return HAS_XGBOOST
+
 
 @dataclass
 class SplitData:
@@ -49,9 +64,17 @@ def chronological_split(
     )
 
 
-def build_models(config: TrainConfig = DEFAULT_CONFIG) -> dict[str, Pipeline]:
-    """Return the candidate models, each as a scikit-learn Pipeline."""
-    return {
+def build_models(
+    config: TrainConfig = DEFAULT_CONFIG,
+    include_xgboost: bool | None = None,
+) -> dict[str, Pipeline]:
+    """Return the candidate models, each as a scikit-learn Pipeline.
+
+    When ``include_xgboost`` is ``None`` (default), XGBoost is added only if the
+    package is installed. Pass ``True`` to require it explicitly (raising if it
+    is missing) or ``False`` to force it off.
+    """
+    models: dict[str, Pipeline] = {
         "baseline_mean": Pipeline(
             [("model", DummyRegressor(strategy="mean"))]
         ),
@@ -76,6 +99,29 @@ def build_models(config: TrainConfig = DEFAULT_CONFIG) -> dict[str, Pipeline]:
         ),
     }
 
+    want_xgb = HAS_XGBOOST if include_xgboost is None else include_xgboost
+    if want_xgb:
+        if not HAS_XGBOOST:
+            raise ImportError(
+                "XGBoost was requested but is not installed. "
+                "Install it with: pip install xgboost"
+            )
+        models["xgboost"] = Pipeline(
+            [
+                (
+                    "model",
+                    XGBRegressor(
+                        random_state=config.random_state,
+                        n_jobs=config.n_jobs,
+                        objective="reg:squarederror",
+                        tree_method="hist",
+                    ),
+                )
+            ]
+        )
+
+    return models
+
 
 # Small search spaces keep the demo fast while still showing the mechanics.
 SEARCH_SPACES: dict[str, dict] = {
@@ -88,6 +134,13 @@ SEARCH_SPACES: dict[str, dict] = {
         "model__n_estimators": [200, 400],
         "model__learning_rate": [0.05, 0.1],
         "model__max_depth": [2, 3],
+    },
+    # Used only when XGBoost is installed.
+    "xgboost": {
+        "model__n_estimators": [300, 600],
+        "model__learning_rate": [0.05, 0.1],
+        "model__max_depth": [4, 6],
+        "model__subsample": [0.8, 1.0],
     },
 }
 
