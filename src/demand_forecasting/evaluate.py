@@ -1,11 +1,16 @@
 """Evaluation metrics and diagnostic plots."""
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import matplotlib
 
-matplotlib.use("Agg")  # headless-safe backend for CI / scripts
+# Use the headless-safe "Agg" backend only when running outside an interactive
+# session (scripts/CI). Inside Jupyter/IPython a GUI or inline backend is
+# already configured, so we leave it untouched to keep ``plt.show()`` working.
+if "ipykernel" not in sys.modules and "IPython" not in sys.modules:
+    matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402

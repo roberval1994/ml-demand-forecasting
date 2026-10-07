@@ -6,11 +6,14 @@ it does is as important as the score itself.
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import matplotlib
 
-matplotlib.use("Agg")
+# Only force the headless backend outside interactive sessions (see evaluate.py).
+if "ipykernel" not in sys.modules and "IPython" not in sys.modules:
+    matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
 from sklearn.inspection import permutation_importance  # noqa: E402
