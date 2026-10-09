@@ -31,6 +31,35 @@ rica: sazonalidade (hora, dia da semana, estação), efeitos climáticos e feria
 para demonstrar engenharia de atributos e comparação de modelos sem nenhuma restrição de
 licenciamento.
 
+## 💼 Contexto & impacto de negócio
+
+**Problema.** Operadores de bike-sharing precisam saber *quantas bicicletas serão alugadas,
+onde e quando*. Falta de bikes numa estação movimentada significa viagens perdidas e
+usuários frustrados; excesso significa inventário ocioso e custo evitável de
+rebalanceamento.
+
+**Quem se beneficia.** Times de operação (rebalanceamento de frota), planejamento
+(capacidade e expansão) e financeiro (orçamento guiado pela demanda).
+
+**Resultados medidos (no conjunto de teste).**
+- O melhor modelo (**XGBoost**) atinge **R² ≈ 0,955**, explicando ~96% da variância da demanda horária.
+- O XGBoost melhora ~**2%** sobre o Gradient Boosting (scikit-learn) tunado, e todos os modelos de árvore superam o baseline da média com folga.
+
+> 💡 *Enquadramento de negócio ilustrativo:* uma previsão horária precisa permite ao
+> operador pré-posicionar bikes nas estações que vão precisar delas, reduzindo rupturas
+> nos horários de pico. O repositório entrega o motor de previsão; as métricas acima da
+> linha pontilhada são as efetivamente medidas sobre os dados.
+
+## 🧠 Decisões técnicas & trade-offs
+
+| Decisão | Por quê | Trade-off considerado |
+|---|---|---|
+| **Modelos de árvore (RF, GBT, XGBoost)** em vez de lineares | Capturam interações não-lineares (hora × fim de semana) sem cruzamento manual de atributos | Menos interpretáveis que a regressão linear — mitigado com importância por permutação |
+| **Split cronológico + `TimeSeriesSplit`** em vez de aleatório | Um split aleatório vazaria o futuro no treino, inflando as métricas | Janela de treino efetiva menor; aceito para manter a avaliação honesta |
+| **Codificação cíclica (sin/cos)** em vez de inteiros crus | Ensina o modelo que a hora 23 é vizinha da hora 0 | Duas colunas por atributo cíclico em vez de uma |
+| **XGBoost mantido opcional** | Mantém a instalação base leve; nem todos precisam dele | Caminho extra de código para detectar o pacote — vale pela portabilidade |
+| **Lógica em `src/`, notebooks só narram** | Código testável, reutilizável e revisável | Um pouco mais de setup que um notebook único — padrão em projetos sérios |
+
 ## 🗂️ Estrutura do projeto
 
 ```

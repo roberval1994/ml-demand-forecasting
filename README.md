@@ -30,6 +30,34 @@ The [Bike Sharing dataset](https://archive.ics.uci.edu/dataset/275/bike+sharing+
 seasonality (hour, weekday, season), weather effects, and holidays. It is ideal to
 showcase feature engineering and model comparison without any licensing concerns.
 
+## 💼 Business context & impact
+
+**Problem.** Bike-sharing operators must know *how many bikes will be rented, where, and
+when*. Under-supply at a busy station means lost trips and frustrated users; over-supply
+means idle inventory and avoidable rebalancing cost.
+
+**Who benefits.** Operations teams (fleet rebalancing), planning teams (capacity and
+expansion), and finance (demand-driven budgeting).
+
+**Measured results (on the held-out test set).**
+- Best model (**XGBoost**) reaches **R² ≈ 0.955**, explaining ~96% of the variance in hourly demand.
+- XGBoost improves ~**2%** over the tuned scikit-learn Gradient Boosting, and all tree models beat the mean baseline by a wide margin.
+
+> 💡 *Illustrative business framing:* an accurate hourly demand forecast lets operators
+> pre-position bikes toward the stations that will need them, cutting stock-outs at peak
+> hours. The repository delivers the forecasting engine; the business metrics above the
+> dashed line are the ones actually measured on data.
+
+## 🧠 Technical decisions & trade-offs
+
+| Decision | Why | Trade-off considered |
+|---|---|---|
+| **Tree-based models (RF, GBT, XGBoost)** over linear models | Capture non-linear interactions (hour × weekend) with no manual feature crossing | Less directly interpretable than linear regression — mitigated with permutation importance |
+| **Chronological split + `TimeSeriesSplit`** over random split | A random split would leak the future into training, inflating scores | Smaller effective training window; accepted to keep evaluation honest |
+| **Cyclical (sin/cos) encoding** over raw integers | Teaches the model that hour 23 is adjacent to hour 0 | Two columns per cyclical feature instead of one |
+| **XGBoost kept optional** | Keeps the base install light; not everyone needs it | Extra code path to detect the package — worth it for portability |
+| **Logic in `src/`, notebooks only narrate** | Testable, reusable, reviewable code | Slightly more setup than a single notebook — standard for serious projects |
+
 ## 🗂️ Project structure
 
 ```
